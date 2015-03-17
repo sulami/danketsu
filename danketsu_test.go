@@ -10,3 +10,10 @@ func TestSanity(t *testing.T) {
 	}
 }
 
+func TestStatus(t *testing.T) {
+	s := status()
+	if s != "" {
+		t.Error("Unexpected status output.")
+	}
+}
+
