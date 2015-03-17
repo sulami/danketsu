@@ -1,4 +1,4 @@
-package danketsu
+package main
 
 import (
 	"testing"
