@@ -45,7 +45,7 @@ func main() {
 	flag.Parse()
 
 	http.HandleFunc("/status/", statusHandler)
-	// TODO registerCallbackHandler
+	http.HandleFunc("/api/v1/", apiV1Handler)
 	http.ListenAndServe(":" + strconv.Itoa(*port), nil)
 }
 
@@ -60,8 +60,9 @@ func status() string {
 	return ""
 }
 
-func registerCallbackHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("OK")) // FIXME ?
+// V1 of the general API - handles everything that will be used by
+// other services.
+func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func registerCallback(n string, a string) {

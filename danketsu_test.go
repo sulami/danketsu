@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 	"time"
+	"net/http"
 )
 
 func TestSanity(t *testing.T) {
@@ -47,6 +48,15 @@ func TestRegisterCallback(t *testing.T) {
 	}
 	if tev.addr != "http://localhost:1339/ev/" {
 		t.Error("Failed to set callback address.")
+	}
+}
+
+func TestApiV1Access(t *testing.T) {
+	go main() // Start the actual webserver
+
+	_, err := http.Get("http://localhost:8080/api/v1/")
+	if err != nil {
+		t.Error(err.Error())
 	}
 }
 
