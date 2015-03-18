@@ -64,7 +64,8 @@ func status() string {
 // V1 of the general API - handles everything that will be used by
 // other services.
 func apiV1Handler(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "POST" { // POST for registering a new callback
+	// POST for (un)registering a callback
+	if r.Method == "POST" {
 		type V1Request struct {
 			Action, Event, Addr string
 		}
@@ -78,12 +79,31 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 
 		if rq.Action == "register" {
 			registerCallback(rq.Event, r.RemoteAddr)
+		} else if rq.Action == "unregister" {
+			unregisterCallback(rq.Event, r.RemoteAddr)
 		}
 	}
 }
 
-func registerCallback(n string, a string) {
+func registerCallback(n, a string) {
 	c := newCallback(n, a)
 	callbacks[n] = append(callbacks[n], c)
+}
+
+func unregisterCallback(n, a string) {
+	cbs := callbacks[n]
+	if cbs != nil {
+		for i, cb := range(cbs) {
+			if cb.addr == a {
+				// This is some elaborate mechanic to
+				// remove an element from a slice
+				// without causing a memory leak.
+				copy(cbs[i:], cbs[i+1:])
+				cbs[len(cbs)-1] = nil
+				cbs = cbs[:len(cbs)-1]
+				callbacks[n] = cbs
+			}
+		}
+	}
 }
 

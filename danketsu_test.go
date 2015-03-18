@@ -81,6 +81,22 @@ func TestApiV1Access(t *testing.T) {
 	if !strings.Contains(callbacks["test_apiv1"][0].addr, "127.0.0.1:") {
 		t.Error("Failed to register a callback address correctly.")
 	}
+
+	// Unregister the same callback.
+	var tpl2 = []byte(`
+		{"action": "unregister", "event": "test_apiv1"}
+	`)
+
+	resp, err = http.Post("http://localhost:8080/api/v1/",
+	                      "application/json", bytes.NewBuffer(tpl2))
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if resp.StatusCode != 200 {
+		t.Error("Server says we failed to unregister a callback.")
+	}
+	if len(callbacks["test_apiv1"]) != 0 {
+		t.Error("Failed to unregister a callback.")
 	}
 }
 
