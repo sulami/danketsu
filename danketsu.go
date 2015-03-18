@@ -81,6 +81,8 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 			registerCallback(rq.Event, rq.Address)
 		} else if rq.Action == "unregister" {
 			unregisterCallback(rq.Event, rq.Address)
+		} else {
+			w.WriteHeader(400)
 		}
 	}
 }

@@ -106,5 +106,22 @@ func TestApiV1Access(t *testing.T) {
 	if len(callbacks["test_apiv1"]) != 0 {
 		t.Error("Failed to unregister a callback.")
 	}
+
+	// Malformed request
+	var tpl3 = []byte(`
+		{
+			"event":   "test_apiv1",
+			"address": "http://localhost:8081/api/v1/ev/14/"
+		 }
+	`)
+
+	resp, err = http.Post("http://localhost:8080/api/v1/",
+	                      "application/json", bytes.NewBuffer(tpl3))
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if resp.StatusCode != 400 {
+		t.Error("Server accepted a malformed request.")
+	}
 }
 
