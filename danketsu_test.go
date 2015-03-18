@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 	"time"
 	"net/http"
@@ -75,7 +76,11 @@ func TestApiV1Access(t *testing.T) {
 		t.Error("Server says we failed to register a callback.")
 	}
 	if len(callbacks["test_apiv1"]) != 1 {
-		t.Error("Failed to register a callback..")
+		t.Error("Failed to register a callback.")
+	}
+	if !strings.Contains(callbacks["test_apiv1"][0].addr, "127.0.0.1:") {
+		t.Error("Failed to register a callback address correctly.")
+	}
 	}
 }
 
