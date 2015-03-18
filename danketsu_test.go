@@ -19,8 +19,11 @@ func TestStatus(t *testing.T) {
 }
 
 func TestNewEvent(t *testing.T) {
-	e := NewEvent()
+	e := NewEvent("test_toast")
 	// This should not take even close to a second.
+	if e.name != "test_toast" {
+		t.Error("Failed to set event name.")
+	}
 	if time.Since(e.timestamp) > time.Second {
 		t.Error("Failed to set event timestamp.")
 	}

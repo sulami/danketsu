@@ -8,12 +8,14 @@ import (
 )
 
 type Event struct {
+	name      string
 	timestamp time.Time
 }
 
-func NewEvent() (e *Event) {
+func NewEvent(n string) (e *Event) {
 	e = new(Event)
 
+	e.name = n
 	e.timestamp = time.Now()
 
 	return e
