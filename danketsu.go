@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"flag"
 	"strconv"
 	"time"
@@ -9,17 +10,39 @@ import (
 )
 
 type Event struct {
-	name      string // "prefix_event"
-	timestamp time.Time
+	Name      string // "prefix_event"
+	Timestamp time.Time
 }
 
 func newEvent(n string) (e *Event) {
 	e = new(Event)
 
-	e.name = n
-	e.timestamp = time.Now()
+	e.Name = n
+	e.Timestamp = time.Now()
 
 	return e
+}
+
+func fireEvent(n string) {
+	cbs := callbacks[n]
+	if cbs != nil {
+		ev := new(Event)
+		ev.Name = n
+		ev.Timestamp = time.Now()
+
+		for _, cb := range cbs {
+			fire(ev, cb.addr)
+		}
+	}
+}
+
+func fire(e *Event, addr string) {
+	enc, err := json.Marshal(e)
+	if err != nil {
+		// TODO log failure
+		return
+	}
+	http.Post(addr, "application/json", bytes.NewBuffer(enc))
 }
 
 type Callback struct {
@@ -27,7 +50,7 @@ type Callback struct {
 	addr  string // "http://1.2.3.4:56/ev/"
 }
 
-func newCallback(e string, a string) (c *Callback) {
+func newCallback(e, a string) (c *Callback) {
 	c = new(Callback)
 
 	c.event = e
@@ -81,6 +104,8 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 			registerCallback(rq.Event, rq.Address)
 		} else if rq.Action == "unregister" {
 			unregisterCallback(rq.Event, rq.Address)
+		} else if rq.Action == "fire" {
+			fireEvent(rq.Event)
 		} else {
 			w.WriteHeader(400)
 		}

@@ -5,6 +5,7 @@ import (
 	"strings"
 	"testing"
 	"time"
+	"encoding/json"
 	"net/http"
 )
 
@@ -23,11 +24,11 @@ func TestStatus(t *testing.T) {
 
 func TestNewEvent(t *testing.T) {
 	e := newEvent("test_toast")
-	if e.name != "test_toast" {
+	if e.Name != "test_toast" {
 		t.Error("Failed to set event name.")
 	}
 	// This should not take even close to a second.
-	if time.Since(e.timestamp) > time.Second {
+	if time.Since(e.Timestamp) > time.Second {
 		t.Error("Failed to set event timestamp.")
 	}
 }
@@ -63,16 +64,16 @@ func TestApiV1Access(t *testing.T) {
 	}
 
 	// Register some callback.
-	var tpl1 = []byte(`
+	var tpl = []byte(`
 		{
 			"action":  "register",
 			"event":   "test_apiv1",
-			"address": "http://localhost:8081/api/v1/ev/14/"
+			"address": "http://localhost:8081/"
 		 }
 	`)
 
 	resp, err := http.Post("http://localhost:8080/api/v1/",
-	                       "application/json", bytes.NewBuffer(tpl1))
+	                       "application/json", bytes.NewBuffer(tpl))
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -86,17 +87,65 @@ func TestApiV1Access(t *testing.T) {
 		t.Error("Failed to register a callback address correctly.")
 	}
 
-	// Unregister the same callback.
-	var tpl2 = []byte(`
+	// Fire an event and listen for an answer.
+	receivedAnswer := make(chan bool, 1)
+	timeout := time.After(time.Second / 10) // Should be enough.
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		type Answer struct {
+			Name      string
+			Timestamp time.Time
+		}
+		ldec := json.NewDecoder(r.Body)
+		var parsed Answer
+		err := ldec.Decode(&parsed)
+		if err != nil {
+			t.Error("Failed to parse the server's answer.")
+		} else if parsed.Name != "test_apiv1" {
+			t.Error("Event name mismatch.")
+		} else if time.Since(parsed.Timestamp) > time.Second {
+			t.Error("Event timestamp mismatch.")
+		} else {
+			receivedAnswer <- true
+		}
+	})
+	go http.ListenAndServe(":8081", nil)
+
+	tpl = []byte(`
 		{
-			"action":  "unregister",
+			"action":  "fire",
 			"event":   "test_apiv1",
-			"address": "http://localhost:8081/api/v1/ev/14/"
+			"address": "http://localhost:8081/"
 		 }
 	`)
 
 	resp, err = http.Post("http://localhost:8080/api/v1/",
-	                      "application/json", bytes.NewBuffer(tpl2))
+	                      "application/json", bytes.NewBuffer(tpl))
+	if err != nil {
+		t.Error(err)
+	}
+	if resp.StatusCode != 200 {
+		t.Error("Server says we failed to fire an event.")
+	}
+
+	select {
+	case <-timeout:
+		t.Error("Fired event did not reach test (in time).")
+	case <-receivedAnswer:
+		// Desired behaviour.
+	}
+
+	// Unregister the same callback.
+	tpl = []byte(`
+		{
+			"action":  "unregister",
+			"event":   "test_apiv1",
+			"address": "http://localhost:8081/"
+		 }
+	`)
+
+	resp, err = http.Post("http://localhost:8080/api/v1/",
+	                      "application/json", bytes.NewBuffer(tpl))
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -108,7 +157,7 @@ func TestApiV1Access(t *testing.T) {
 	}
 
 	// Malformed request
-	var tpl3 = []byte(`
+	tpl = []byte(`
 		{
 			"event":   "test_apiv1",
 			"address": "http://localhost:8081/api/v1/ev/14/"
@@ -116,7 +165,7 @@ func TestApiV1Access(t *testing.T) {
 	`)
 
 	resp, err = http.Post("http://localhost:8080/api/v1/",
-	                      "application/json", bytes.NewBuffer(tpl3))
+	                      "application/json", bytes.NewBuffer(tpl))
 	if err != nil {
 		t.Error(err.Error())
 	}
