@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"testing"
 	"time"
 	"net/http"
@@ -54,9 +55,27 @@ func TestRegisterCallback(t *testing.T) {
 func TestApiV1Access(t *testing.T) {
 	go main() // Start the actual webserver
 
+	// Check general connectivity.
 	_, err := http.Get("http://localhost:8080/api/v1/")
 	if err != nil {
 		t.Error(err.Error())
+	}
+
+	// Register some callback.
+	var tpl1 = []byte(`
+		{"action": "register", "event": "test_apiv1"}
+	`)
+
+	resp, err := http.Post("http://localhost:8080/api/v1/",
+	                       "application/json", bytes.NewBuffer(tpl1))
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if resp.StatusCode != 200 {
+		t.Error("Server says we failed to register a callback.")
+	}
+	if len(callbacks["test_apiv1"]) != 1 {
+		t.Error("Failed to register a callback..")
 	}
 }
 

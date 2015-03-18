@@ -4,6 +4,7 @@ import (
 	"flag"
 	"strconv"
 	"time"
+	"encoding/json"
 	"net/http"
 )
 
@@ -63,6 +64,22 @@ func status() string {
 // V1 of the general API - handles everything that will be used by
 // other services.
 func apiV1Handler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == "POST" { // POST for registering a new callback
+		type V1Request struct {
+			Action, Event, Addr string
+		}
+
+		dec := json.NewDecoder(r.Body)
+		var rq V1Request
+		err := dec.Decode(&rq)
+		if err != nil {
+			panic(err)
+		}
+
+		if rq.Action == "register" {
+			registerCallback(rq.Event, rq.Addr)
+		}
+	}
 }
 
 func registerCallback(n string, a string) {
