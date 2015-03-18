@@ -77,7 +77,7 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if rq.Action == "register" {
-			registerCallback(rq.Event, rq.Addr)
+			registerCallback(rq.Event, r.RemoteAddr)
 		}
 	}
 }
