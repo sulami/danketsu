@@ -39,3 +39,14 @@ func TestNewCallback(t *testing.T) {
 	}
 }
 
+func TestRegisterCallback(t *testing.T) {
+	registerCallback("test_bread", "http://localhost:1339/ev/")
+	tev := callbacks["test_bread"][0]
+	if tev.event != "test_bread" {
+		t.Error("Failed to set callback event.")
+	}
+	if tev.addr != "http://localhost:1339/ev/" {
+		t.Error("Failed to set callback address.")
+	}
+}
+

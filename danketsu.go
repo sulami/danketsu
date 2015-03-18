@@ -35,11 +35,17 @@ func newCallback(e string, a string) (c *Callback) {
 	return c
 }
 
+var callbacks = map[string]([]*Callback) {
+	// Global map to hold all registered callbacks sorted by the
+	// callback's name.
+}
+
 func main() {
 	port := flag.Int("port", 8080, "Port to listen on")
 	flag.Parse()
 
 	http.HandleFunc("/status/", statusHandler)
+	// TODO registerCallbackHandler
 	http.ListenAndServe(":" + strconv.Itoa(*port), nil)
 }
 
@@ -52,5 +58,14 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 func status() string {
 	return ""
+}
+
+func registerCallbackHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK")) // FIXME ?
+}
+
+func registerCallback(n string, a string) {
+	c := newCallback(n, a)
+	callbacks[n] = append(callbacks[n], c)
 }
 
