@@ -64,7 +64,11 @@ func TestApiV1Access(t *testing.T) {
 
 	// Register some callback.
 	var tpl1 = []byte(`
-		{"action": "register", "event": "test_apiv1"}
+		{
+			"action":  "register",
+			"event":   "test_apiv1",
+			"address": "http://localhost:8081/api/v1/ev/14/"
+		 }
 	`)
 
 	resp, err := http.Post("http://localhost:8080/api/v1/",
@@ -78,13 +82,17 @@ func TestApiV1Access(t *testing.T) {
 	if len(callbacks["test_apiv1"]) != 1 {
 		t.Error("Failed to register a callback.")
 	}
-	if !strings.Contains(callbacks["test_apiv1"][0].addr, "127.0.0.1:") {
+	if !strings.Contains(callbacks["test_apiv1"][0].addr, "localhost") {
 		t.Error("Failed to register a callback address correctly.")
 	}
 
 	// Unregister the same callback.
 	var tpl2 = []byte(`
-		{"action": "unregister", "event": "test_apiv1"}
+		{
+			"action":  "unregister",
+			"event":   "test_apiv1",
+			"address": "http://localhost:8081/api/v1/ev/14/"
+		 }
 	`)
 
 	resp, err = http.Post("http://localhost:8080/api/v1/",

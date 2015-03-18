@@ -67,7 +67,7 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 	// POST for (un)registering a callback
 	if r.Method == "POST" {
 		type V1Request struct {
-			Action, Event, Addr string
+			Action, Event, Address string
 		}
 
 		dec := json.NewDecoder(r.Body)
@@ -78,9 +78,9 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if rq.Action == "register" {
-			registerCallback(rq.Event, r.RemoteAddr)
+			registerCallback(rq.Event, rq.Address)
 		} else if rq.Action == "unregister" {
-			unregisterCallback(rq.Event, r.RemoteAddr)
+			unregisterCallback(rq.Event, rq.Address)
 		}
 	}
 }
