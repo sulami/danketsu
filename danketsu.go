@@ -8,17 +8,31 @@ import (
 )
 
 type Event struct {
-	name      string
+	name      string // "prefix_event"
 	timestamp time.Time
 }
 
-func NewEvent(n string) (e *Event) {
+func newEvent(n string) (e *Event) {
 	e = new(Event)
 
 	e.name = n
 	e.timestamp = time.Now()
 
 	return e
+}
+
+type Callback struct {
+	event string // "prefix_event"
+	addr  string // "http://1.2.3.4:56/ev/"
+}
+
+func newCallback(e string, a string) (c *Callback) {
+	c = new(Callback)
+
+	c.event = e
+	c.addr = a
+
+	return c
 }
 
 func main() {
