@@ -118,7 +118,8 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 		var rq V1Request
 		err := dec.Decode(&rq)
 		if err != nil {
-			panic(err)
+			w.WriteHeader(400)
+			return
 		}
 
 		if rq.Action == "register" {

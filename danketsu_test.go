@@ -163,7 +163,7 @@ func TestApiV1Access(t *testing.T) {
 	// Malformed request
 	tpl = []byte(`
 		{
-			"event":   "test_apiv1",
+			"event":   "test_apiv1"
 			"address": "http://localhost:8081/api/v1/ev/14/"
 		 }
 	`)
