@@ -17,7 +17,7 @@ func TestSanity(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	s := status()
-	if s != "" {
+	if s != "0" {
 		t.Error("Unexpected status output.")
 	}
 }
@@ -175,6 +175,11 @@ func TestApiV1Access(t *testing.T) {
 	}
 	if resp.StatusCode != 400 {
 		t.Error("Server accepted a malformed request.")
+	}
+
+	s := status()
+	if s != "1" {
+		t.Error("Unexpected status output.")
 	}
 }
 

@@ -102,7 +102,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 // Return a set of statistics about the service for monitoring reasons.
 func status() string {
-	return ""
+	return strconv.Itoa(len(events))
 }
 
 // V1 of the general API - handles everything that will be used by
