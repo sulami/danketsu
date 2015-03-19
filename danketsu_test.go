@@ -135,6 +135,10 @@ func TestApiV1Access(t *testing.T) {
 		// Desired behaviour.
 	}
 
+	if len(events) != 1 || events[0].Name != "test_apiv1" {
+		t.Error("In-memory event log has not been updated properly.")
+	}
+
 	// Unregister the same callback.
 	tpl = []byte(`
 		{

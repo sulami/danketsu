@@ -14,6 +14,11 @@ type Event struct {
 	Timestamp time.Time
 }
 
+var events = []*Event {
+	// This is a list of event pointers that is used as in-memory
+	// short-time log and of course for statistics.
+}
+
 func newEvent(n string) (e *Event) {
 	e = new(Event)
 
@@ -29,6 +34,7 @@ func fireEvent(n string) {
 		ev := new(Event)
 		ev.Name = n
 		ev.Timestamp = time.Now()
+		events = append(events, ev)
 
 		for _, cb := range cbs {
 			fire(ev, cb.addr)
@@ -68,6 +74,20 @@ func main() {
 	port := flag.Int("port", 8080, "Port to listen on")
 	flag.Parse()
 
+	// Maintenance goroutine to clean up the in-memory event log.
+	go func() {
+		ticker := time.Tick(time.Minute * 5)
+		select {
+		case <-ticker:
+			for i, ev := range(events) {
+				if time.Since(ev.Timestamp) > time.Hour * 24 {
+					events = events[:i]
+					break
+				}
+			}
+		}
+	} ()
+
 	http.HandleFunc("/status/", statusHandler)
 	http.HandleFunc("/api/v1/", apiV1Handler)
 	http.ListenAndServe(":" + strconv.Itoa(*port), nil)
@@ -80,6 +100,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(status()))
 }
 
+// Return a set of statistics about the service for monitoring reasons.
 func status() string {
 	return ""
 }
@@ -87,7 +108,7 @@ func status() string {
 // V1 of the general API - handles everything that will be used by
 // other services.
 func apiV1Handler(w http.ResponseWriter, r *http.Request) {
-	// POST for (un)registering a callback
+	// POST for (un)registering a callback or firing events.
 	if r.Method == "POST" {
 		type V1Request struct {
 			Action, Event, Address string
