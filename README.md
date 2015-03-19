@@ -44,8 +44,8 @@ The addresses passed are the ones for the callbacks, so Danketsu knows who to
 message in case an event occurs.
 
 There is also a status page at `http://server:port/status/` which currently
-returns the number of fired events in the last 24 hours when called via HTTP
-GET.
+returns the number of fired events in the last 24 hours and the number of
+registered callbacks in JSON-form when called via HTTP GET.
 
 There is no internal event database, which means events are not more than
 arbitrary strings. You can register for events that do no exists and can fire

@@ -100,12 +100,23 @@ func main() {
 // functions, which makes testing a lot simpler.
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte(status()))
+	w.Write(status())
 }
 
 // Return a set of statistics about the service for monitoring reasons.
-func status() string {
-	return strconv.Itoa(len(state.events))
+func status() []byte {
+	type Status struct {
+		Events, Callbacks int
+	}
+	status := Status{
+		Events: len(state.events),
+		Callbacks: len(state.callbacks),
+	}
+	r, err := json.MarshalIndent(status, "", "  ")
+	if err != nil {
+		// TODO Do something?
+	}
+	return r
 }
 
 // V1 of the general API - handles everything that will be used by

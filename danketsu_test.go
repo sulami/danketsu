@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"testing"
 	"time"
 	"encoding/json"
@@ -16,7 +17,8 @@ func TestSanity(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	s := status()
-	if s != "0" {
+	if !strings.Contains(string(s[:]), "\"Events\": 0") ||
+	   !strings.Contains(string(s[:]), "\"Callbacks\": 0") {
 		t.Error("Unexpected status output.")
 	}
 }
@@ -177,7 +179,8 @@ func TestApiV1Access(t *testing.T) {
 	}
 
 	s := status()
-	if s != "1" {
+	if !strings.Contains(string(s[:]), "\"Events\": 1") ||
+	   !strings.Contains(string(s[:]), "\"Callbacks\": 2") {
 		t.Error("Unexpected status output.")
 	}
 }
