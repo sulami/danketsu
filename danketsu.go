@@ -14,11 +14,6 @@ type Event struct {
 	Timestamp time.Time
 }
 
-var events = []*Event {
-	// This is a list of event pointers that is used as in-memory
-	// short-time log and of course for statistics.
-}
-
 func newEvent(n string) (e *Event) {
 	e = new(Event)
 
@@ -29,12 +24,12 @@ func newEvent(n string) (e *Event) {
 }
 
 func fireEvent(n string) {
-	cbs := callbacks[n]
+	cbs := state.callbacks[n]
 	if cbs != nil {
 		ev := new(Event)
 		ev.Name = n
 		ev.Timestamp = time.Now()
-		events = append(events, ev)
+		state.events = append(state.events, ev)
 
 		for _, cb := range cbs {
 			fire(ev, cb.addr)
@@ -65,9 +60,17 @@ func newCallback(e, a string) (c *Callback) {
 	return c
 }
 
-var callbacks = map[string]([]*Callback) {
-	// Global map to hold all registered callbacks sorted by the
-	// callback's name.
+// The global state that is used for testing and statistics.
+type State struct {
+	// In-memory log of the most recent events.
+	events []*Event
+
+	// All registered callbacks.
+	callbacks map[string]([]*Callback)
+}
+
+var state State = State{
+	callbacks: make(map[string]([]*Callback)),
 }
 
 func main() {
@@ -79,9 +82,9 @@ func main() {
 		ticker := time.Tick(time.Minute * 5)
 		select {
 		case <-ticker:
-			for i, ev := range(events) {
+			for i, ev := range(state.events) {
 				if time.Since(ev.Timestamp) > time.Hour * 24 {
-					events = events[:i]
+					state.events = state.events[:i]
 					break
 				}
 			}
@@ -102,7 +105,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 
 // Return a set of statistics about the service for monitoring reasons.
 func status() string {
-	return strconv.Itoa(len(events))
+	return strconv.Itoa(len(state.events))
 }
 
 // V1 of the general API - handles everything that will be used by
@@ -136,11 +139,11 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 
 func registerCallback(n, a string) {
 	c := newCallback(n, a)
-	callbacks[n] = append(callbacks[n], c)
+	state.callbacks[n] = append(state.callbacks[n], c)
 }
 
 func unregisterCallback(n, a string) {
-	cbs := callbacks[n]
+	cbs := state.callbacks[n]
 	if cbs != nil {
 		for i, cb := range(cbs) {
 			if cb.addr == a {
@@ -150,7 +153,7 @@ func unregisterCallback(n, a string) {
 				copy(cbs[i:], cbs[i+1:])
 				cbs[len(cbs)-1] = nil
 				cbs = cbs[:len(cbs)-1]
-				callbacks[n] = cbs
+				state.callbacks[n] = cbs
 			}
 		}
 	}

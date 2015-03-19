@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"strings"
 	"testing"
 	"time"
 	"encoding/json"
@@ -45,7 +44,7 @@ func TestNewCallback(t *testing.T) {
 
 func TestRegisterCallback(t *testing.T) {
 	registerCallback("test_bread", "http://localhost:1339/ev/")
-	tev := callbacks["test_bread"][0]
+	tev := state.callbacks["test_bread"][0]
 	if tev.event != "test_bread" {
 		t.Error("Failed to set callback event.")
 	}
@@ -80,10 +79,10 @@ func TestApiV1Access(t *testing.T) {
 	if resp.StatusCode != 200 {
 		t.Error("Server says we failed to register a callback.")
 	}
-	if len(callbacks["test_apiv1"]) != 1 {
+	if len(state.callbacks["test_apiv1"]) != 1 {
 		t.Error("Failed to register a callback.")
 	}
-	if !strings.Contains(callbacks["test_apiv1"][0].addr, "localhost") {
+	if state.callbacks["test_apiv1"][0].addr != "http://localhost:8081/" {
 		t.Error("Failed to register a callback address correctly.")
 	}
 
@@ -135,7 +134,7 @@ func TestApiV1Access(t *testing.T) {
 		// Desired behaviour.
 	}
 
-	if len(events) != 1 || events[0].Name != "test_apiv1" {
+	if len(state.events) != 1 || state.events[0].Name != "test_apiv1" {
 		t.Error("In-memory event log has not been updated properly.")
 	}
 
@@ -156,7 +155,7 @@ func TestApiV1Access(t *testing.T) {
 	if resp.StatusCode != 200 {
 		t.Error("Server says we failed to unregister a callback.")
 	}
-	if len(callbacks["test_apiv1"]) != 0 {
+	if len(state.callbacks["test_apiv1"]) != 0 {
 		t.Error("Failed to unregister a callback.")
 	}
 
