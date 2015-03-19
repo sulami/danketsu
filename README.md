@@ -19,26 +19,32 @@ defines the following interactions:
 
 #### Registering a callback
 
-    {
-        "action": "register",
-        "event": "users_new_user_created",
-        "address": "http://deimos.company.local:1338/api/v1/"
-    }
+```json
+{
+    "action": "register",
+    "event": "users_new_user_created",
+    "address": "http://deimos.company.local:1338/api/v1/"
+}
+```
 
 #### Unregistering a callback
 
-    {
-        "action": "unregister",
-        "event": "users_new_user_created",
-        "address": "http://deimos.company.local:1338/api/v1/"
-    }
+```json
+{
+    "action": "unregister",
+    "event": "users_new_user_created",
+    "address": "http://deimos.company.local:1338/api/v1/"
+}
+```
 
 #### Firing an event
 
-    {
-        "action": "fire",
-        "event": "users_new_user_created"
-    }
+```json
+{
+    "action": "fire",
+    "event": "users_new_user_created"
+}
+```
 
 The addresses passed are the ones for the callbacks, so Danketsu knows who to
 message in case an event occurs.
