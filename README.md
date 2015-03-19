@@ -17,7 +17,7 @@ The binary takes an optional parameter `-port`, which defaults to 8080.
 The APIv1 can be reached via HTTP POST at `http://server:port/api/v1/` and
 defines the following interactions:
 
-- Registering a callback
+#### Registering a callback
 
     {
         "action": "register",
@@ -25,7 +25,7 @@ defines the following interactions:
         "address": "http://deimos.company.local:1338/api/v1/"
     }
 
-- Unregistering a callback
+#### Unregistering a callback
 
     {
         "action": "unregister",
@@ -33,7 +33,7 @@ defines the following interactions:
         "address": "http://deimos.company.local:1338/api/v1/"
     }
 
-- Firing an event
+#### Firing an event
 
     {
         "action": "fire",
