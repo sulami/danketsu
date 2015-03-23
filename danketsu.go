@@ -12,23 +12,23 @@ import (
 type Event struct {
 	Name      string // "prefix_event"
 	Timestamp time.Time
+	Payload   string
 }
 
-func newEvent(n string) (e *Event) {
+func newEvent(n string, pl []byte) (e *Event) {
 	e = new(Event)
 
 	e.Name = n
 	e.Timestamp = time.Now()
+	e.Payload = pl
 
 	return e
 }
 
-func fireEvent(n string) {
+func fireEvent(n string, pl []byte) {
 	cbs := state.callbacks[n]
 	if cbs != nil {
-		ev := new(Event)
-		ev.Name = n
-		ev.Timestamp = time.Now()
+		ev := newEvent(n, pl)
 		state.events = append(state.events, ev)
 
 		for _, cb := range cbs {
@@ -125,7 +125,7 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 	// POST for (un)registering a callback or firing events.
 	if r.Method == "POST" {
 		type V1Request struct {
-			Action, Event, Address string
+			Action, Event, Address, Payload string
 		}
 
 		dec := json.NewDecoder(r.Body)
@@ -141,7 +141,7 @@ func apiV1Handler(w http.ResponseWriter, r *http.Request) {
 		} else if rq.Action == "unregister" {
 			unregisterCallback(rq.Event, rq.Address)
 		} else if rq.Action == "fire" {
-			fireEvent(rq.Event)
+			fireEvent(rq.Event, []byte(rq.Payload))
 		} else {
 			w.WriteHeader(400)
 		}

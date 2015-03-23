@@ -42,12 +42,18 @@ defines the following interactions:
 ```json
 {
     "action": "fire",
-    "event": "users_new_user_created"
+    "event": "users_new_user_created",
+    "payload": "{
+	\"username\": \"sulami\"
+    }"
 }
 ```
 
 The addresses passed are the ones for the callbacks, so Danketsu knows who to
-message in case an event occurs.
+message in case an event occurs. The payload is JSON packed into a bytearray
+and is completely ignored by Danketsu and just passed to all receivers, so they
+can use the additional infos. **Keep in mind that quotation marks have to be
+escaped, or bad things will happen.**
 
 There is also a status page at `http://server:port/status/` which currently
 returns the number of fired events in the last 24 hours and the number of

@@ -25,10 +25,14 @@ func TestStatus(t *testing.T) {
 }
 
 func TestNewEvent(t *testing.T) {
-	e := newEvent("test_toast")
+	e := newEvent("test_toast", []byte("{\"info\": \"something\"}"))
 	if e.Name != "test_toast" {
 		t.Error("Failed to set event name.")
 		t.Errorf("test_toast != %v", e.Name)
+	}
+	if string(e.Payload) != "{\"info\": \"something\"}" {
+		t.Error("Failed to set event paylaod.")
+		t.Errorf("Event payload: %v", e.Payload)
 	}
 	// This should not take even close to a second.
 	if time.Since(e.Timestamp) > time.Second {
@@ -129,7 +133,7 @@ func TestApiV1Access(t *testing.T) {
 		{
 			"action":  "fire",
 			"event":   "test_apiv1",
-			"address": "http://localhost:8081/"
+			"payload": "{\"user\": \"sulami\"}"
 		 }
 	`)
 
